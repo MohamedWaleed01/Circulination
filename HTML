@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+</head>
+<body>
+    <script>
+        let inscription_id = window.location.pathname.split("/").pop();
+        let randomIndex;
+        let dots = [];
+        let circlePositions = [];
+        const factor = 0.004;
+        const count = 10;
+        const planetRadius = () => width * 0.133;
+
+        function hashToInt(e) {
+            let i = 0;
+            if (0 === e.length) return i;
+            for (let n = 0; n < e.length; n++) {
+                i = (i << 5) - i + e.charCodeAt(n), i |= 0
+            }
+            return Math.abs(i)
+        }
+
+        function setup() {
+            console.log('Inscription ID:', inscription_id);
+
+            let numberFromHash = hashToInt(inscription_id || 'default');
+            randomSeed(numberFromHash);
+            noiseSeed(numberFromHash);
+
+            createCanvas(windowWidth*0.8, windowWidth*0.8);
+            noLoop();
+
+            randomIndex = floor(random(8));
+
+            if (randomIndex === 0) {
+                drawOption1();
+            } else if (randomIndex === 1) {
+                drawOption2();
+            } else if (randomIndex === 2) {
+                drawOption3();
+            } else if (randomIndex === 3) {
+                drawOption4();
+            } else if (randomIndex === 4) {
+                drawOption5();
+            } else if (randomIndex === 5) {
+                drawOption6();
+            } else if (randomIndex === 6) {
+                drawOption7();
+            } else if (randomIndex === 7) {
+                drawOption8();
+            }
+
+            drawPerlinWaves();
+            drawFlowField();
+            drawHarmonizingPattern();
+            drawConnectingPattern();
+            drawPlanet();
+            drawConnectingPattern2();
+            setNoise();
+            drawCirclePattern();
+            drawFlowers();
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth * 0.8, windowWidth * 0.8);
+            redraw();
+        }
+
+        function drawPerlinWaves() {
+            let noiseScale = 0.005;
+            let noiseStrength = height * 0.033;
+            let waveSpacing = width * 0.007;
+            let noiseOffset = random(1000);
+
+            if (randomIndex === 0) {
+                stroke(151, 143, 113, 100);
+            } else if (randomIndex === 1) {
+                stroke(202, 100, 250, 100);
+            } else if (randomIndex === 2) {
+                stroke(87, 99, 68, 100);
+            } else if (randomIndex === 3) {
+                stroke(237, 100, 38, 100);
+            } else if (randomIndex === 4) {
+                stroke(180, 140, 148, 100);
+            } else if (randomIndex === 5) {
+                stroke(84, 73, 75, 100);
+            } else if (randomIndex === 6) {
+                stroke(86, 78, 88, 100);
+            } else if (randomIndex === 7) {
+                stroke(169, 88, 45, 100);
+            }
+
+            noFill();
+            strokeWeight(width * 0.0015);
+
+            for (let y = height * 0.05; y < height * 0.25; y += waveSpacing) {
+                beginShape();
+                curveVertex(width * 0.05, y);
+                curveVertex(width * 0.05, y);
+
+                let yoff = random(1000);
+
+                for (let x = width * 0.05; x < width * 0.5; x += width * 0.007) {
+                    let yPos = y + (noise(x * noiseScale, yoff + noiseOffset) * noiseStrength);
+                    curveVertex(x, yPos);
+                }
+
+                curveVertex(width * 0.5, y);
+                curveVertex(width * 0.5, y);
+                endShape();
+            }
+        }
+
+        function drawOption1() {
+            background('#fac69b');
+            stroke('#8f8882');
+            fill('#ffead9');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption2() {
+            background('#72a8f0');
+            fill('#47d0ec');
+            stroke('#ca61f9');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption3() {
+            background('#79845e');
+            fill('#bdc694');
+            stroke('#576344');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption4() {
+            background('#518294');
+            fill('#8ac6c5');
+            stroke('#f26627');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption5() {
+            background('#f6d4dc');
+            stroke('#b38a92');
+            fill('#fce8ec');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption6() {
+            background('#EEF3DF');
+            fill('#E8E4BE');
+            stroke('#54494b');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption7() {
+            background('#564e58');
+            stroke('#904e55');
+            fill('#bfb48f');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawOption8() {
+            background('#cebbaf');
+            stroke('#813a19');
+            fill('#c8a28d');
+            square(width * 0.033, height * 0.033, width * 0.933);
+        }
+
+        function drawCirclePattern() {
+            let minRadius = width * 0.007;
+            let maxRadius = width * 0.025;
+            let maxAttempts = 100;
+            let circlePositions = [];
+
+            for (let cluster = 0; cluster < 15; cluster++) {
+                let clusterX = random(width * 0.083, width * 0.55);
+                let clusterY = random(height * 0.75, height * 0.917);
+                let clusterSize = random(15, 25);
+
+                for (let i = 0; i < clusterSize; i++) {
+                    let attempts = 0;
+                    let valid = false;
+                    let x, y, radius;
+
+                    while (!valid && attempts < maxAttempts) {
+                        radius = random(minRadius, maxRadius);
+                        let angle = random(TWO_PI);
+                        let distance = random(radius * 2, width * 0.083);
+                        x = clusterX + cos(angle) * distance;
+                        y = clusterY + sin(angle) * distance;
+
+                        x = constrain(x, width * 0.067, width * 0.458);
+                        y = constrain(y, height * 0.75, height * 0.933);
+
+                        valid = true;
+
+                        for (let pos of circlePositions) {
+                            let distance = dist(x, y, pos.x, pos.y);
+                            if (distance < (pos.radius + radius) * 1.1) {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        attempts++;
+                    }
+
+                    if (valid) {
+                        if (randomIndex === 0) {
+                            fill(151, 143, 113, random(100, 150));
+                            stroke(151, 143, 113, 150);
+                        } else if (randomIndex === 1) {
+                            fill(202, 100, 250, random(100, 150));
+                            stroke(202, 100, 250, 150);
+                        } else if (randomIndex === 2) {
+                            fill(87, 99, 68, random(100, 150));
+                            stroke('#576344');
+                        } else if (randomIndex === 3) {
+                            fill(237, 100, 38, random(100, 150));
+                            stroke(237, 100, 38, 150);
+                        } else if (randomIndex === 4) {
+                            fill(180, 140, 148, random(100, 150));
+                            stroke(180, 140, 148, 150);
+                        } else if (randomIndex === 5) {
+                            fill(84, 73, 75, random(80, 150));
+                            stroke(84, 73, 75, 150);
+                        } else if (randomIndex === 6) {
+                            fill(86, 78, 88, random(100, 150));
+                            stroke(86, 78, 88, 150);
+                        } else if (randomIndex === 7) {
+                            fill(169, 88, 45, random(100, 150));
+                            stroke(169, 88, 45, 150);
+                        }
+
+                        strokeWeight(0.5);
+
+                        push();
+                        translate(x, y);
+                        rotate(random(TWO_PI));
+                        let irregularity = random(0.8, 1.2);
+                        ellipse(0, 0, radius * 2 * irregularity, radius * 2);
+                        pop();
+
+                        circlePositions.push({ x, y, radius });
+                    }
+                }
+            }
+        }
+
+        class Dot {
+            constructor(radius) {
+                const r = random(TWO_PI);
+                const x = sin(r) * radius;
+                const y = cos(r) * radius;
+                this.pos = createVector(x, y);
+                this.prev = createVector(x, y);
+                this.deadCount = 0;
+                this.radius = radius;
+            }
+
+            update(noize) {
+                this.v = p5.Vector.fromAngle(noize * TWO_PI + (this.deadCount * PI));
+                this.v.setMag(3);
+                this.prev = this.pos.copy();
+                this.pos = this.pos.add(this.v);
+            }
+
+            draw() {
+                if (dist(0, 0, this.pos.x, this.pos.y) > this.radius ||
+                    dist(0, 0, this.prev.x, this.prev.y) > this.radius) {
+                    return;
+                }
+
+                if (randomIndex === 0) {
+                    stroke(151, 143, 113, 150);
+                } else if (randomIndex === 1) {
+                    stroke(202, 100, 250, 150);
+                } else if (randomIndex === 2) {
+                    stroke('#576344');
+                } else if (randomIndex === 3) {
+                    stroke(237, 100, 38, 150);
+                } else if (randomIndex === 4) {
+                    stroke(180, 140, 148, 150);
+                } else if (randomIndex === 5) {
+                    stroke(84, 73, 75, 150);
+                } else if (randomIndex === 6) {
+                    stroke(86, 78, 88, 150);
+                } else if (randomIndex === 7) {
+                    stroke(169, 88, 45, 150);
+                }
+                strokeWeight(2);
+                line(this.prev.x, this.prev.y, this.pos.x, this.pos.y);
+            }
+        }
+
+        function drawPlanet() {
+            let validPosition = false;
+            let planetX, planetY;
+            let attempts = 0;
+            const maxAttempts = 100;
+
+            while (!validPosition && attempts < maxAttempts) {
+                planetX = random(width * 0.217, width * 0.25);
+                planetY = random(height * 0.467, height * 0.533);
+
+                validPosition = true;
+                for (let pos of circlePositions) {
+                    let distance = dist(planetX, planetY, pos.x, pos.y);
+                    if (distance < (planetRadius() + pos.radius * 1.9)) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+                attempts++;
+            }
+
+            if (validPosition) {
+                push();
+                translate(planetX, planetY);
+
+                noFill();
+                if (randomIndex === 0) {
+                    stroke(151, 143, 113);
+                } else if (randomIndex === 1) {
+                    stroke(202, 100, 250);
+                } else if (randomIndex === 2) {
+                    stroke('#6E7D56');
+                } else if (randomIndex === 3) {
+                    stroke(237, 100, 38);
+                } else if (randomIndex === 4) {
+                    stroke(180, 140, 148);
+                } else if (randomIndex === 5) {
+                    stroke(132, 117, 120);
+                } else if (randomIndex === 6) {
+                    stroke(86, 78, 88);
+                } else if (randomIndex === 7) {
+                    stroke(169, 88, 45);
+                }
+                strokeWeight(2);
+                ellipse(0, 0, planetRadius() * 2);
+
+                dots = [];
+                for (let i = 0; i < count; i++) {
+                    dots.push(new Dot(planetRadius()));
+                }
+
+                noiseDetail(2);
+                for (let frame = 0; frame < 150; frame++) {
+                    for (let dot of dots) {
+                        let n = noise(dot.pos.x * factor, dot.pos.y * factor);
+                        dot.update(n);
+                        dot.draw();
+                    }
+                }
+
+                pop();
+            }
+        }
+
+        function drawFlowers() {
+            let randomizer;
+            do {
+                randomizer = floor(random(50));
+            } while (randomizer === 0);
+
+            let flowerPositions = [];
+            let stemPositions = [];
+
+            for (let i = 0; i < randomizer; i++) {
+                let valid = false;
+                let attempts = 0;
+                let maxAttempts = 100;
+                let x0, y0, s0;
+
+                while (!valid && attempts < maxAttempts) {
+                    x0 = random(width * 0.567, width * 0.883);
+                    y0 = random(height * 0.567, height * 0.783);
+                    s0 = random(0.21, 0.25);  
+                    valid = true;
+                    for (let pos of flowerPositions) {
+                        let distance = dist(x0, y0, pos.x, pos.y);
+                        if (distance < (60 * s0 + 60 * pos.s) *(width/600)) {                                   valid = false;
+                            break;
+                        }
+                    }
+                    attempts++;
+                }
+
+                if (valid) {
+                    flowerPositions.push({ x: x0, y: y0, s: s0 });
+
+                    let validStem = false;
+                    attempts = 0;
+
+                    while (!validStem && attempts < maxAttempts) {
+                        validStem = true;
+                        let stemBaseY = height * 0.958;
+
+                        for (let pos of stemPositions) {
+                            let distance = dist(x0, stemBaseY, pos.x, pos.y);
+                            if (distance < width * 0.1) {
+                                validStem = false;
+                                break;
+                            }
+                        }
+                        attempts++;
+                    }
+
+                    if (validStem) {
+                        stemPositions.push({ x: x0, y: height * 0.958 });
+        drawStem(x0, y0);
+        drawFlower(x0, y0, s0);
+      }
+    }
+  }
+}
+
+function drawStem(x, y) {
+  if (randomIndex === 0) {
+    stroke(151, 143, 113);
+  } else if (randomIndex === 1) {
+    stroke(202, 100, 250);
+  } else if (randomIndex === 2) {
+    stroke('#576344');
+  } else if (randomIndex === 3) {
+    stroke(237, 100, 38);
+  } else if (randomIndex === 4) {
+    stroke(180, 140, 148);
+  } else if (randomIndex === 5) {
+    stroke(84, 73, 75);
+  } else if (randomIndex === 6) {
+    stroke(86, 78, 88);
+  } else if (randomIndex === 7) {
+    stroke(169, 88, 45);  
+  }
+  strokeWeight(2);
+  noFill();
+
+  let stemBaseY = height * 0.965;
+  let x1 = x + random(-50, 50);
+  let y1 = stemBaseY - height * 0.167;
+  let x2 = x + random(-30, 30);
+  let y2 = stemBaseY - height * 0.333;
+
+  bezier(x, stemBaseY, x1, y1, x2, y2, x, y);
+}
+
+function drawFlower(x, y, ss) {
+  stroke(100, 100, 100);
+  if (randomIndex === 0) {
+    stroke(151, 143, 113);
+    fill(244, 196, 155, 10);
+  } else if (randomIndex === 1) {
+    stroke(202, 100, 250);
+    fill(100, 250, 300, 30);
+  } else if (randomIndex === 2) {
+    fill(104, 164, 100, 10);
+  } else if (randomIndex === 3) {
+    stroke(237, 100, 38);
+    fill(111, 207, 200, 30);
+  } else if (randomIndex === 4) {
+    stroke(180, 140, 148);
+    fill(244, 212, 220, 20);
+  } else if (randomIndex===5) {
+    stroke(84, 73, 75);
+    fill(239, 237, 197, 30);
+  } else if (randomIndex === 6) {
+    stroke(86, 78, 88);
+    fill(191, 180, 143, 15);  
+  } else if (randomIndex === 7) {
+    stroke(169, 88, 45);  
+    fill(200, 171, 143, 20);  
+  }
+
+  push();
+  translate(x, y);
+  scale(ss * width/600);  
+  let rr = 50;
+  let r0 = 250;
+  let iPeddles = 10;
+  for (let i = 0; i < iPeddles; i++) {
+    let angle = map(i, 0, iPeddles, 0, TWO_PI);
+    let px = rr * cos(angle);
+    let py = rr * sin(angle);
+    ellipse(px, py, r0);
+  }
+  pop();
+}
+
+function setNoise() {
+  loadPixels();
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (random(1) > 0.9) {
+        const index = (x + y * width) * 17;
+        pixels[index] = 150;
+        pixels[index + 1] = 255;
+        pixels[index + 2] = 255;
+        pixels[index + 3] = 200;
+      }
+    }
+  }
+  updatePixels();
+}
+
+function drawConnectingPattern() {
+  let points = [];
+  for (let i = 0; i < 15; i++) {
+    points.push({
+      x: random(width * 0.083, width * 0.4),
+      y: random(height * 0.28, height * 0.37)  
+    });
+  }
+
+  if (randomIndex === 0) {
+    stroke(151, 143, 113, 60);
+  } else if (randomIndex === 1) {
+    stroke(202, 100, 250, 60);
+  } else if (randomIndex === 2) {
+    stroke(87, 99, 68, 60);
+  } else if (randomIndex === 3) {
+    stroke(237, 100, 38, 60);
+  } else if (randomIndex === 4) {
+    stroke(180, 140, 148, 60);
+  } else if (randomIndex === 5) {
+    stroke(84, 73, 75, 60);
+  } else if (randomIndex === 6) {
+    stroke(86, 78, 88, 60);
+  } else if (randomIndex === 7) {
+    stroke(169, 88, 45, 60);
+  }
+
+  strokeWeight(0.3);
+  noFill();
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      let d = dist(points[i].x, points[i].y, points[j].x, points[j].y);
+      if (d < width * 0.12 && d > width * 0.05) {
+        line(points[i].x, points[i].y, points[j].x, points[j].y);
+        ellipse(points[i].x, points[i].y, width * 0.003, width * 0.003);                   ellipse(points[j].x, points[j].y, width * 0.005, width * 0.005);
+      }
+    }
+  }
+}
+
+function drawConnectingPattern2() {
+  let points = [];
+  for (let i = 0; i < 15; i++) {  
+    points.push({
+      x: random(width * 0.083, width * 0.4),
+      y: random(height * 0.638, height * 0.72)  
+    });
+  }
+
+  if (randomIndex === 0) {
+    stroke(151, 143, 113, 60);  
+  } else if (randomIndex === 1) {
+    stroke(202, 100, 250, 60);
+  } else if (randomIndex === 2) {
+    stroke(87, 99, 68, 60);
+  } else if (randomIndex === 3) {
+    stroke(237, 100, 38, 60);
+  } else if (randomIndex === 4) {
+    stroke(180, 140, 148, 60);
+  } else if (randomIndex === 5) {
+    stroke(84, 73, 75, 60);
+  } else if (randomIndex === 6) {
+    stroke(86, 78, 88, 60);
+  } else if (randomIndex === 7) {
+    stroke(169, 88, 45, 60);
+  }
+
+  strokeWeight(0.3);
+  noFill();
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      let d = dist(points[i].x, points[i].y, points[j].x, points[j].y);
+      if (d < width * 0.12 && d > width * 0.05) {  
+        line(points[i].x, points[i].y, points[j].x, points[j].y);
+        ellipse(points[i].x, points[i].y, width * 0.003, width * 0.003);
+        ellipse(points[j].x, points[j].y, width * 0.003, width * 0.003);
+      }
+    }
+  }
+}
+
+function drawHarmonizingPattern() {
+  let currentColor;
+  if (randomIndex === 0) {
+    currentColor = color(151, 143, 113);
+  } else if (randomIndex === 1) {
+    currentColor = color(202, 100, 250);
+  } else if (randomIndex === 2) {
+    currentColor = color(87, 99, 68);
+  } else if (randomIndex === 3) {
+    currentColor = color(237, 100, 38);
+  } else if (randomIndex === 4) {
+    currentColor = color(180, 140, 148);
+  } else if (randomIndex === 5) {
+    currentColor = color(84, 73, 75);
+  } else if (randomIndex === 6) {
+    currentColor = color(86, 78, 88);
+  } else if (randomIndex === 7) {
+    currentColor = color(169, 88, 45);  
+  }
+
+  let centerX = width * 0.7;
+  let centerY = height * 0.42;
+
+  push();
+  translate(centerX, centerY);
+
+  let numRings = 10;
+  let points = [];
+
+  for (let ring = 1; ring <= numRings; ring++) {
+    let radius = ring * (width * 0.01);
+    let numPoints = 16;
+    let ringPoints = [];
+
+    for (let i = 0; i < numPoints; i++) {
+      let angle = (TWO_PI / numPoints) * i;
+
+      let distortedRadius = radius+ sin(angle * 3 + ring * 0.5) * (width * 0.007);
+      let x = cos(angle) * distortedRadius;
+      let y = sin(angle) * distortedRadius;
+      ringPoints.push({x, y});
+    }
+    points.push(ringPoints);
+
+    beginShape();
+    noFill();
+    let opacity = map(ring, 1, numRings, 40, 100);
+    stroke(red(currentColor), green(currentColor), blue(currentColor), opacity);
+    strokeWeight(0.5);
+
+    for (let i = 0; i <= numPoints; i++) {
+      let point = ringPoints[i % numPoints];
+      curveVertex(point.x, point.y);
+      if (i === 0) curveVertex(point.x, point.y); 
+      if (i === numPoints) curveVertex(ringPoints[0].x, ringPoints[0].y); 
+    }
+    endShape();
+  }
+
+  for (let ring = 0; ring < points.length - 1; ring++) {
+    let currentRing = points[ring];
+    let nextRing = points[ring + 1];
+
+    for (let i = 0; i < currentRing.length; i += 2) {
+      let opacity = map(ring, 0, points.length - 2, 30, 10);
+      stroke(red(currentColor), green(currentColor), blue(currentColor), opacity);
+      strokeWeight(0.5);
+
+      line(currentRing[i].x, currentRing[i].y, 
+           nextRing[i].x, nextRing[i].y);
+
+      noStroke();
+      fill(red(currentColor), green(currentColor), blue(currentColor), opacity * 1.5);
+      ellipse(currentRing[i].x, currentRing[i].y, width * 0.002, width * 0.002);
+    }
+  }
+
+  for (let r = width * 0.033; r > 0; r -= width * 0.003) {
+    let opacity = map(r, width * 0.033, 0, 5, 15);
+    noStroke();
+    fill(red(currentColor), green(currentColor), blue(currentColor), opacity);
+    ellipse(0, 0, r * 2);
+  }
+
+  pop();
+}
+
+function drawFlowField() {
+  let currentColor;
+  if (randomIndex === 0) {
+    currentColor = color(151, 143, 113, 60); 
+  } else if (randomIndex === 1) {
+    currentColor = color(202, 100, 250, 60);
+  } else if (randomIndex === 2) {
+    currentColor = color(87, 99, 68, 60);
+  } else if (randomIndex === 3) {
+    currentColor = color(237, 100, 38, 60);
+  } else if (randomIndex === 4) {
+    currentColor = color(180, 140, 148, 60);
+  } else if (randomIndex === 5) {
+    currentColor = color(84, 73, 75, 60);
+  } else if (randomIndex === 6) {
+    currentColor = color(86, 78, 88, 60);
+  } else if (randomIndex === 7) {
+    currentColor = color(169, 88, 45, 60);  
+  }
+
+  let resolution = width * 0.015;
+  let startX = width * 0.54;
+  let endX = width * 0.95;
+  let startY = height * 0.067;
+  let endY = height * 0.303;
+
+  for (let x = startX; x < endX; x += resolution) {
+    for (let y = startY; y < endY; y += resolution) {
+      let noiseVal = noise(x * 0.005, y * 0.005); 
+      let angle = noiseVal * TWO_PI * 2;
+
+      push();
+      strokeWeight(1); 
+      stroke(red(currentColor), green(currentColor), blue(currentColor));
+
+      let lineLength = width * 0.01; 
+      let x2 = x + cos(angle) * lineLength;
+      let y2 = y + sin(angle) * lineLength;
+      line(x, y, x2, y2);
+
+      noStroke();
+      fill(red(currentColor), green(currentColor), blue(currentColor));
+      ellipse(x, y, width * 0.002, width * 0.002); 
+
+      pop();
+    }
+  }
+}
+
+    </script>
+</body>
+</html>
