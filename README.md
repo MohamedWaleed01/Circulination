@@ -15,3 +15,5 @@ Starting the project I've decided to divide the canvas to 5 parts:
 • Fifth part which is "Flowers". Flowers expand with stems drawn as flowing lines, and their blossoms form beautiful circles that are similar to indications of geometry in nature. Together, they represent simplicity and beauty, combining art and life.
 
 Last but not least, two different connecting patterns are the intersecting lines forming networks. On the other hand, harmonizing patterns include the concentric circles radiating balance and the parallel lines flowing in rhythmic order. Together, these patterns create this amazing project! 
+
+![download (6)](https://github.com/user-attachments/assets/66a94121-9ffc-446c-85e7-73f1db1fab4a)
